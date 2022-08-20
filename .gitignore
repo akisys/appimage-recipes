@@ -1,0 +1,6 @@
+*/**
+!.gitignore
+!.github/**
+!LICENSE
+!README.md
+!ai-recipes/*.yml
