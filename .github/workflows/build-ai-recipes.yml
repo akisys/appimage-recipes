@@ -13,7 +13,7 @@ on:
       - main
 
 jobs:
-  changedfiles:
+  changedairecipefiles:
     runs-on: ubuntu-latest
     outputs:
       all: ${{steps.changed-files.outputs.all}}
@@ -48,8 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       airecipes: ${{steps.changed-files-matrix.outputs.airecipes}}
-    needs: changedfiles
-    if: needs.changedfiles.outputs.airecipes != ''
+    needs: changedairecipefiles
+    if: needs.changedairecipefiles.outputs.airecipes != ''
     steps:
       - name: Check changes files output
         id: changed-files-matrix
