@@ -1,0 +1,74 @@
+version: 1
+
+script: |
+  export URL='https://download.nomachine.com/download/7.10/Linux/nomachine-enterprise-client_7.10.1_1_x86_64.tar.gz'
+  export VERSION=$(echo $URL | cut -d/ -f7 | cut -d_ -f2-3)
+  export ARCH=$(echo $URL | cut -d/ -f7 | cut -d_ -f4- | cut -d. -f1)
+  export SHORTNAME=nxplayer
+  export FULLNAME=nomachine-enterprise-client
+  export PKG=${FULLNAME}_${VERSION}_${ARCH}.tar.gz
+  wget -q "${URL}" -O /tmp/${PKG}
+  rm -rf ./AppDir
+  mkdir -p /tmp/build/$SHORTNAME
+  tar -zxf /tmp/${PKG} --directory /tmp/build/$SHORTNAME --strip-components=1
+  mkdir -p ./AppDir/{usr/bin,usr/share,etc/NX/player/localhost}
+  tar -zxf /tmp/build/$SHORTNAME/etc/NX/player/packages/nxclient.tar.gz --directory ./AppDir/usr
+  tar -zxf /tmp/build/$SHORTNAME/etc/NX/player/packages/nxplayer.tar.gz --directory ./AppDir/usr
+  echo 'PlayerRoot = "/usr/NX"' > ./AppDir/etc/NX/player/localhost/player.cfg
+  mv -u ./AppDir/usr/NX/share/icons ./AppDir/usr/share/
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: com.nomachine.enterprise.client
+    name: NoMachine-Enterprise-Client
+    icon: NoMachine-desktop
+    version: 7.10.1_1
+    exec: bin/bash
+    exec_args: $APPDIR/usr/NX/bin/nxplayer $@
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+    include:
+      - dash
+      - bash
+      - coreutils
+    exclude: []
+
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
+  test:
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: "./AppRun"
+      use_host_x: True
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: "./AppRun"
+      use_host_x: True
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: "./AppRun"
+      use_host_x: True
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: "./AppRun"
+      use_host_x: True
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: "./AppRun"
+      use_host_x: True
+
+AppImage:
+  arch: x86_64
